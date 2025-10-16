@@ -170,7 +170,7 @@
     .hero-sep{
       position: relative;
       margin-top: var(--hero-wave-shift); /* pulls wave up under hero image */
-      z-index: 1;
+       z-index: 1;
     }
 
     /* Inline SVG wave */
@@ -313,7 +313,8 @@
     }
 
 #action::before{
-  content: "";
+  content: none !important;
+  display: none !important;
   position: absolute;
   left: 0; right: 0;
   top: calc(-1 * var(--sep-height) + 1px);   /* lift it up over the join */
@@ -370,6 +371,63 @@
     }
     .footer-logo{ height:84px; width:auto }
     .legal{ margin:0; opacity:.9; font-size:.95rem }
+
+
+
+
+
+    /* ===== All mobile overrides (<=600px) — keep this LAST ===== */
+    @media (max-width:600px){
+      :root{
+        /* wave sizing/position on mobile */
+        --hero-wave-shift: -260px;
+        --hero-wave-height: 340px;
+
+        /* timeline positioning */
+        --timeline-content-shift: 0px;          /* keep cards where they are */
+        --timeline-arc-shift-mobile: -120px;    /* move semicircle up */
+
+        /* wavy banner quote knob (tweak 12–40%) */
+        --quote-bottom-mobile: 25%;
+      }
+
+      /* make % bottom work; only on mobile to avoid desktop breakage */
+      .hero-sep{ min-height: var(--hero-wave-height); }
+
+      .hero-sep__quote{
+        left: 6vw;
+        bottom: var(--quote-bottom-mobile) !important;
+        font-size: clamp(1.1rem, 4vw, 1.6rem);
+        line-height: 1.25;
+        max-width: 78vw;
+      }
+
+      .timeline{ margin-top:12vh; }
+      #scene, .labels{ transform: translateY(var(--timeline-arc-shift-mobile)); }
+
+      .info{
+        padding: 12px 14px;
+        border-radius: 12px;
+        transform: translate(-50%, -50%) !important;
+      }
+      .info h3{ font-size: clamp(1rem, 4.2vw, 1.15rem); line-height: 1.25; }
+      .info p { font-size: clamp(.9rem, 3.6vw, 1rem);   line-height: 1.4;  }
+
+      /* space between wave and timeline */
+      .spacer{ height: calc(2vh + var(--hero-wave-height) * 0.10); }
+    }
+
+    /* Desktop quote placement (optional, keeps your old desktop values) */
+    @media (min-width:601px){
+      .hero-sep__quote{
+        left: 5vw;
+        bottom: calc(var(--hero-wave-height) - 1025px);
+        font-size: clamp(2.5rem, 2.4vw, 4rem);
+      }
+    }
+
+
+
   </style>
 </head>
 <body>
@@ -473,7 +531,7 @@
     <div class="container">
       <div class="features-wrap">
         <div class="features-header">
-          <h2>What we’re doing</h2>
+          <h2>Our Technology</h2>
           <p>
             We re-analyse the <strong>ultrasound scans already taken</strong> early in the pathway.
             Our ML models, trained on scans from surgically confirmed cases, look for the subtle
@@ -764,6 +822,12 @@
   </script>
 </body>
 </html>
+
+
+
+
+
+
 
 
 

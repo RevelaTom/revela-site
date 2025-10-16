@@ -415,6 +415,18 @@
 
       /* space between wave and timeline */
       .spacer{ height: calc(2vh + var(--hero-wave-height) * 0.10); }
+
+        /* 1) Shorten the sticky scroll area (ends the timeline sooner) */
+      .pin-wrap{ height: 300vh; }          /* try 360–480vh */
+
+      /* 2) Bring the semicircle a bit higher but not too high */
+      .timeline{ margin-top: 10vh; }       /* was 12vh in your CSS */
+
+      /* 3) Reduce the gap between wave and timeline */
+      .spacer{ height: 14vh; }             /* try 10–20vh */
+
+      /* 4) Nudge “What we do” up slightly */
+      #action{ margin-top: -6vh; }         /* try -2vh to -6vh */
     }
 
     /* Desktop quote placement (optional, keeps your old desktop values) */
@@ -822,6 +834,12 @@
   </script>
 </body>
 </html>
+
+
+
+
+
+
 
 
 

@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Revela Health Limited</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;600;700&family=Instrument+Serif:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+
+  <style>
+    /* =========================
+       THEME / TOKENS
+       ========================= */
+    :root{
+      --bg:#ffffff;
+      --fg:#470000;
+      --muted:#6f3030;
+      --accent:#D13042;
+      --dot:#bfa5a5;
+      --arc:#bfa8a8;
+      --card:#ffffff;
+      --border:#e6cfcf;
+
+      --hero-logo-size: 400px;
+      --menu-width: 340px;
+
+      /* Timeline decoration */
+      --clock-img: url('clock.png');
+      --clock-size: min(60vmin, 600px);
+      --clock-opacity: 0.25;
+
+      /* Section backgrounds */
+      --action-bg: url('background.png'); /* image for "What we do" */
+      
+      /* Wave between hero and timeline */
+      --hero-wave-height: 600px;       /* height of the pink wave */
+      --hero-wave-shift: -400px;       /* pull wave up under hero; more negative = higher */
+      --wave-pink: #FAD2DA;
+      
+      --hero-logo-gap: clamp(24px, 4vw, 72px);
+      --hero-content-shift: 20px;
+      --after-hero-space: 80px;
+
+      /*timeline section */
+      --timeline-content-shift: 90px;
+
+      --sep-height: 140px;          /* the band height */
+      --sep-fill:   #FAD2DA;        /* fill of the separator */
+      --sep-stroke: var(--accent);  /* accent outline on the crest */
+      
+    }
+
+    /* =========================
+       BASE
+       ========================= */
+    *{ box-sizing: border-box }
+    html, body{
+      margin: 0;
+      height: 100%;
+      background: var(--bg);
+      color: var(--fg);
+      font: 16px/1.5 "Instrument Sans", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      scroll-behavior: smooth;
+    }
+    img{ max-width: 100%; display: block; height: auto }
+    .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0 }
+
+    /* =========================
+       HAMBURGER + MOBILE MENU
+       ========================= */
+    .hamburger{
+      position: fixed;
+      top: 12px;
+      right: 12px;
+      z-index: 60;
+      width: 48px; height: 48px;
+      padding: 0; border: 0; border-radius: 14px;
+      background: var(--fg);
+      box-shadow: 0 8px 24px rgba(71,0,0,.18);
+      cursor: pointer;
+    }
+    .hamburger span{
+      position: absolute; left: 50%; top: 50%;
+      width: 26px; height: 4px;
+      border-radius: 999px;
+      background: #fff;
+      transform: translate(-50%, -50%);
+      transition: transform .2s ease, opacity .2s ease;
+    }
+    .hamburger span:nth-child(1){ transform: translate(-50%, calc(-50% - 8px)); }
+    .hamburger span:nth-child(3){ transform: translate(-50%, calc(-50% + 8px)); }
+    .hamburger[aria-expanded="true"] span:nth-child(1){ transform: translate(-50%, -50%) rotate(45deg); }
+    .hamburger[aria-expanded="true"] span:nth-child(2){ opacity: 0; }
+    .hamburger[aria-expanded="true"] span:nth-child(3){ transform: translate(-50%, -50%) rotate(-45deg); }
+
+    .no-scroll{ overflow: hidden; }
+
+    .mobile-menu{ position: fixed; inset:0; z-index: 55; pointer-events: none; }
+    .mobile-menu.open{ pointer-events: auto; }
+    .mobile-menu__backdrop{
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.25);
+      opacity: 0; transition: opacity .2s ease;
+    }
+    .mobile-menu.open .mobile-menu__backdrop{ opacity: 1; }
+    .mobile-menu__panel{
+      position: fixed; top: 0; right: 0; height: 100%; width: var(--menu-width);
+      background: #fff; border-left: 1px solid var(--border);
+      box-shadow: -24px 0 40px rgba(0,0,0,.06);
+      transform: translateX(100%); transition: transform .25s ease;
+      display: flex; flex-direction: column; padding: 20px;
+    }
+    .mobile-menu.open .mobile-menu__panel{ transform: translateX(0); }
+    .mobile-menu__header{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:10px }
+    .mobile-menu__brand{ width:140px; height:auto }
+    .mobile-menu__close{ border:1px solid var(--border); background:#fff; border-radius:10px; padding:.35rem .6rem; cursor:pointer; color:var(--fg) }
+    .mobile-menu__links{ list-style:none; margin:12px 0 0; padding:0; display:grid; gap:10px }
+    .mobile-menu__links a{
+      display:block; padding:10px 12px; border-radius:12px; border:1px solid var(--border);
+      color:var(--fg); text-decoration:none;
+    }
+    .mobile-menu__links a:hover{ border-color: var(--accent); color: var(--accent) }
+
+    /* =========================
+       HERO
+       ========================= */
+    .hero{ position: relative; z-index: 3; padding: 2rem 1.25rem 2rem; overflow: visible }
+    .hero-inner{
+      margin: 0 auto;
+      max-width: 1200px;
+      display: grid; grid-template-columns: 1.2fr .8fr; gap: 2rem; align-items: center;
+      margin-top: calc(var(--hero-logo-size) * 0.3 + var(--hero-content-shift));
+    }
+    .hero-logo{
+      position: absolute; top: 20px; left: 50%;
+      transform: translateX(-50%);
+      width: var(--hero-logo-size); max-width: 80vw;
+      pointer-events: none;
+      margin-bottom: calc(var(--hero-logo-size) * 0.5 + var(--hero-logo-gap));
+    }
+    .hero h1{ display:none } /* (kept for a11y if ever needed) */
+    blockquote.big{
+      margin: 0 0 1rem;
+      font-family: "Instrument Serif", Georgia, serif;
+      font-size: clamp(2.2rem, 4.8vw, 3.75rem);
+      line-height: 1.35; text-align: left;
+    }
+    .hero p{ margin: 0 0 1rem; max-width: 60ch; color: var(--muted) }
+    .cta{ display:flex; gap:.75rem; flex-wrap:wrap }
+    .btn-accent{
+      background: var(--accent); color:#fff; border:none; border-radius:12px;
+      padding:.75rem 1rem; font-weight:700; text-decoration:none; display:inline-block;
+    }
+    .btn-ghost{
+      border:1px solid var(--border); background:transparent; border-radius:12px;
+      padding:.75rem 1rem; color:var(--fg); text-decoration:none; display:inline-block;
+    }
+    .hero-ill{ width:100%; max-width:520px; margin-left:auto; position: relative; z-index: 4; }
+
+    @media (max-width: 900px){
+      .hero-inner{ grid-template-columns: 1fr; text-align: center }
+      blockquote.big{ text-align: center }
+      .hero-ill{ margin: 0 auto }
+    }
+
+    /* =========================
+       HERO → WAVE SEPARATOR
+       ========================= */
+    .hero-sep{
+      position: relative;
+      margin-top: var(--hero-wave-shift); /* pulls wave up under hero image */
+      z-index: 1;
+    }
+
+    /* Inline SVG wave */
+    .hero-sep__svg{
+      display: block;
+      width: 100%;
+      height: var(--hero-wave-height); /*  e.g. 200px; adjust to taste */
+      fill: var(--wave-pink);          /* the pink color */
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    .hero-sep__quote{
+      position: absolute;
+      left: 5vw;
+      bottom: calc(var(--hero-wave-height) - 1025px);
+      margin: 0;
+      color: var(--accent);
+      font-family: "Instrument Serif", Georgia, serif;
+      z-index: 3;
+      font-size: clamp(2.5rem, 2.4vw, 4rem);
+    }
+
+    /* Spacer after the wave for breathing room before timeline */
+    .spacer{ height: 40vh }
+
+    /* =========================
+       TIMELINE SECTION
+       ========================= */
+    .pin-wrap{ position:relative; height: 900vh }
+    .stage{ position: sticky; top: 0; height: 100vh; display:grid; place-items:center }
+
+    .timeline-head{
+      position:absolute;
+      top:6vh;
+      left:0;
+      right:0;     /* let the .container center itself */
+      transform:none;
+      width:auto;
+      z-index:4;
+    }
+    
+    .timeline-head h2{
+      margin:0 0 .4rem; font-size: clamp(2.4rem, 6vw, 4rem);
+      font-family: "Instrument Sans", system-ui;
+    }
+    .timeline-head p{ margin:0; color:var(--muted); max-width:70ch }
+
+    .timeline{
+      position:relative; width:min(1200px, 96vw);
+      aspect-ratio: 12/7; margin-top: 30vh;
+    }
+
+    /* gentle pink gradient behind timeline area */
+    #pin{
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0) 20%, rgba(252,204,212,.50) 60%); 
+      position: relative; 
+      z-index: 0;
+    }
+
+        /* Move ONLY the content; the section's background stays put */
+    .pin-wrap .stage > *{
+      transform: translateY(var(--timeline-content-shift));
+    }
+
+    /* If your heading is absolutely positioned, this keeps it in the same
+      relative place compared to the rest after the shift (optional) */
+    .pin-wrap .timeline-head{
+      left: 2vw;
+      transform: translateY(var(--timeline-content-shift));
+    }
+
+    /* Decorative clock image */
+    .timeline::after{
+      content: none !important;
+      top:-8%; right:-10%;
+      width: var(--clock-size); height: var(--clock-size);
+      background-image: var(--clock-img);
+      background-repeat:no-repeat; background-size:contain; background-position:center;
+      opacity: var(--clock-opacity); pointer-events:none; z-index:0;
+    }
+
+    svg{ position:absolute; inset:0; width:100%; height:100%; z-index:1; overflow:visible }
+    .labels{ position:absolute; inset:0; pointer-events:none; z-index:2 }
+    .info{
+      position:absolute; z-index:3;
+      background: var(--card); border:1px solid var(--border); border-radius:18px;
+      padding:18px 20px; box-shadow:0 10px 30px rgba(100,99,99,.12);
+      max-width:min(620px, 74%); text-align:left;
+      opacity:0; transition: opacity .35s ease, transform .35s ease;
+      will-change: opacity, transform;
+      font-family:"Instrument Sans", Georgia, serif;
+    }
+    .info h3{ margin:0 0 6px; font-size:1.35rem; font-weight:700 }
+    .info p{ margin:0; color: var(--muted); font-style: italic }
+
+    .label{
+      position:absolute; transform: translate(-50%, -50%);
+      font-size:.9rem; color:var(--muted);
+      transition: transform .25s, color .25s, font-weight .25s;
+      white-space:nowrap; max-width:160px; text-align:center;
+      font-family:"Instrument Sans", Georgia, serif;
+    }
+    .label.active{ color: var(--accent); font-weight: 700 }
+    .dot{ fill:var(--dot); stroke:var(--border); stroke-width:1; transition: r .25s, fill .25s, filter .25s }
+    .dot.active{ fill:var(--accent); filter: drop-shadow(0 2px 8px rgba(209,48,66,.45)) }
+    #arc{ stroke:var(--arc); stroke-width:8; fill:none; stroke-linecap:round; stroke-opacity:1; display: none !important; }
+
+    /* Mobile tweaks */
+    @media (max-width: 480px){
+      .label{ display:none }
+      .label.active{ display:block }
+      .dot{ opacity:.18 }
+      .dot.near{ opacity:.6 }
+      .dot.active{ opacity:1 }
+      #arc{ stroke:var(--accent); stroke-width:9 }
+      .info{ max-width:94vw }
+    }
+
+
+    .dot.past{
+      fill: var(--accent);
+      opacity: .45;           /* dimmer than current */
+      filter: none;           /* no glow */
+    }
+
+    .label.past{
+      opacity: .6;            /* optional: dim earlier labels */
+    }
+
+    /* =========================
+       WHAT WE'RE DOING
+       ========================= */
+    #action{
+      position: relative;
+      background: var(--action-bg) center/cover no-repeat;
+      padding-top: calc(2rem + var(--sep-height) * 0.25);
+      z-index: 1; /* sits above the timeline, below the wave we draw */
+    }
+
+#action::before{
+  content: "";
+  position: absolute;
+  left: 0; right: 0;
+  top: calc(-1 * var(--sep-height) + 1px);   /* lift it up over the join */
+  height: var(--sep-height);
+  pointer-events: none;
+  z-index: -1; /* stays behind the #action content */
+
+  /* Inline SVG: pink fill + accent stroke (the red line) */
+  background:
+    url("data:image/svg+xml;utf8,\<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 160' preserveAspectRatio='none'>\<defs>\<linearGradient id='g' x1='0' y1='0' x2='0' y2='1'>\<stop offset='0' stop-color='%23FAD2DA' stop-opacity='1'/>\<stop offset='1' stop-color='%23FAD2DA' stop-opacity='0.9'/>\</linearGradient>\</defs>\<!-- Top curve (controls the crest shape) -->\<path d='M0,50 C240,42 480,58 720,50 C960,42 1200,48 1440,40 Z' fill='url(%23g)'/>\<!-- Accent stroke hugging the crest -->\<path d='M0,44 C240,24 480,70 720,46 C960,26 1200,34 1440,16' fill='none' stroke='%23D13042' stroke-width='6' stroke-linecap='round' stroke-opacity='0.9'/>\</svg>") center / 100% 100% no-repeat;
+}
+
+    .section{ padding: 2rem 1.25rem }
+    .container{ width:min(1200px, 96vw); margin: 0 auto }
+    .features-wrap{ display:grid; gap:2rem }
+    .features-header{ display:grid; gap:.6rem }
+    .features-header h2{
+      margin:0; font-family:"Instrument Sans", system-ui;
+      font-size:clamp(2.4rem, 6vw, 4rem);
+    }
+    .features-header p{ margin:0; color:var(--muted); max-width:72ch; font-size:1.08rem }
+    .features-grid{
+      display:grid; gap:2rem; grid-template-columns: repeat(12, 1fr);
+    }
+    .feature-card{
+      grid-column: span 4; background:#fff; border:1px solid var(--border);
+      border-radius:16px; padding:18px 18px 16px;
+    }
+    @media (max-width:1000px){ .feature-card{ grid-column: span 6 } }
+    @media (max-width:600px){ .feature-card{ grid-column: 1 / -1 } }
+    .feature-card h3{ margin:.25rem 0 .25rem; font-size:1.05rem; color:var(--fg) }
+    .feature-card p{ margin:0; color:var(--muted) }
+
+    .steps{
+      display:grid; gap:2rem; margin-top:8px; grid-template-columns: repeat(12, 1fr);
+    }
+    .step{
+      grid-column: span 4; background:#ffffff; border:1px dashed var(--border);
+      border-radius:14px; padding:14px;
+    }
+    .step small{ display:block; color:var(--accent); font-weight:700; margin-bottom:4px; letter-spacing:.02em }
+    .step p{ margin:0; color:var(--muted) }
+    @media (max-width:1000px){ .step{ grid-column: span 6 } }
+    @media (max-width:600px){ .step{ grid-column: 1 / -1 } }
+
+    /* =========================
+       FOOTER
+       ========================= */
+    .site-footer{ background: var(--fg); color: #fff }
+    .footer-inner{
+      width:min(1200px, 96vw); margin:0 auto;
+      display:flex; align-items:center; justify-content:space-between;
+      gap:1rem; padding:24px 0;
+    }
+    .footer-logo{ height:84px; width:auto }
+    .legal{ margin:0; opacity:.9; font-size:.95rem }
+  </style>
+</head>
+<body>
+
+  <!-- Hamburger only (no header nav) -->
+  <button class="hamburger" id="hamburger" aria-label="Open menu" aria-controls="mobileMenu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+
+  <nav class="mobile-menu" id="mobileMenu" hidden aria-hidden="true">
+    <div class="mobile-menu__backdrop" id="mobileMenuBackdrop" aria-hidden="true"></div>
+    <aside class="mobile-menu__panel" role="dialog" aria-modal="true" aria-labelledby="mobileMenuTitle">
+      <div class="mobile-menu__header">
+        <img src="logo.png" alt="Brand" class="mobile-menu__brand">
+        <button class="mobile-menu__close" id="mobileMenuClose" aria-label="Close">✕</button>
+      </div>
+      <h2 id="mobileMenuTitle" class="sr-only">Site menu</h2>
+      <ul class="mobile-menu__links">
+        <li><a href="#timeline">Timeline</a></li>
+        <li><a href="#action">What we’re doing</a></li>
+        <li><a href="/about">About</a></li>
+        <li><a href="/contact">Contact</a></li>
+      </ul>
+    </aside>
+  </nav>
+
+  <!-- =========================
+       HERO
+       ========================= -->
+  <section class="hero" id="top">
+    <img class="hero-logo" src="logo.png" alt="Revela logo">
+
+    <div class="hero-inner">
+      <div>
+        <blockquote class="big">Early endometriosis detection. Better Outcomes.</blockquote>
+        <p>We’re developing software to enable the fast, non-invasive detection of endometriosis. Scroll down to see the journey, or click below to keep updated.</p>
+        <div class="cta">
+          <a class="btn-accent" href="#timeline">Scroll the story ↓</a>
+          <a class="btn-ghost" href="#action">Keep me updated →</a>
+        </div>
+      </div>
+
+      <img class="hero-ill" src="hero.png" alt="Illustration">
+    </div>
+  </section>
+
+  <!-- Wave separator (sits under the hero image) -->
+    <section class="hero-sep" aria-hidden="true">
+      <svg class="hero-sep__svg" viewBox="0 0 1440 220" preserveAspectRatio="none" aria-hidden="true">
+        <!-- Double-wave band: wavy top + wavy bottom -->
+        <path d="
+         M0,110
+    C240,95  480,125 720,110
+    C960,95  1200,105 1440,95
+    L1440,170
+    C1200,185 960,165 720,175
+    C480,185  240,175 0,190
+    Z" />
+      </svg>
+
+
+
+
+  <blockquote class="hero-sep__quote">
+    “It took a decade to get a name for what I’d been feeling all along.”
+  </blockquote>
+</section>
+
+  <div class="spacer"></div>
+
+  <!-- =========================
+       TIMELINE
+       ========================= -->
+  <section id="pin" class="pin-wrap">
+    <div class="stage">
+      <div class="timeline-head container">
+        <h2>The Journey</h2>
+        <p>Daisy’s journey to getting a diagnosis for her endometriosis.</p>
+      </div>
+
+      <div class="timeline" id="timeline">
+        <svg id="scene" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid meet" aria-label="Semicircle timeline">
+          <path id="arc"></path>
+          <g id="dots"></g>
+        </svg>
+
+        <div class="labels" id="labels"></div>
+
+        <div class="info" id="info" role="region" aria-live="polite">
+          <h3 id="infoTitle">Title</h3>
+          <p id="infoText">Detail</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================
+       WHAT WE’RE DOING
+       ========================= -->
+  <section id="action" class="section" aria-label="What we’re doing">
+    <div class="container">
+      <div class="features-wrap">
+        <div class="features-header">
+          <h2>What we’re doing</h2>
+          <p>
+            We re-analyse the <strong>ultrasound scans already taken</strong> early in the pathway.
+            Our ML models, trained on scans from surgically confirmed cases, look for the subtle
+            signs of endometriosis that are often missed. Results are processed in the cloud and
+            returned as a structured report to support diagnosis and treatment planning.
+          </p>
+        </div>
+
+        <div class="features-grid">
+          <article class="feature-card">
+            <h3>No extra burden</h3>
+            <p>We use scans that are <em>already</em> captured. No extra appointments, no extra manpower, no additional hardware on ultrasound machines.</p>
+          </article>
+
+          <article class="feature-card">
+            <h3>AI-driven insight</h3>
+            <p>Trained on retrospectively labelled, surgically validated cases to recognise subtle patterns linked to endometriosis.</p>
+          </article>
+
+          <article class="feature-card">
+            <h3>Clinician-ready reports</h3>
+            <p>Cloud processing returns a structured report to support diagnosis and treatment planning—more than a yes/no answer.</p>
+          </article>
+        </div>
+
+        <div class="steps">
+          <div class="step">
+            <small>01 · Input</small>
+            <p>Hospital uploads existing ultrasound scans securely—no new imaging, no biopsies.</p>
+          </div>
+          <div class="step">
+            <small>02 · Analysis</small>
+            <p>Our cloud model assesses for subtle features associated with endometriosis.</p>
+          </div>
+          <div class="step">
+            <small>03 · Report</small>
+            <p>Clinician receives a clear report to support diagnosis and treatment planning.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================
+       FOOTER
+       ========================= -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <img src="logo-white.png" alt="Revela Health logo" class="footer-logo">
+        <span class="sr-only">Revela Health Limited</span>
+      </div>
+      <p class="legal">© <span id="year"></span> Revela Health Limited. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- =========================
+       SCRIPT
+       ========================= -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Footer year
+      document.getElementById('year').textContent = new Date().getFullYear();
+
+      // Mobile menu
+      const burger   = document.getElementById('hamburger');
+      const menu     = document.getElementById('mobileMenu');
+      const backdrop = document.getElementById('mobileMenuBackdrop');
+      const closeBtn = document.getElementById('mobileMenuClose');
+
+      function openMenu(){
+        burger.setAttribute('aria-expanded','true');
+        menu.hidden = false;
+        menu.classList.add('open');
+        menu.setAttribute('aria-hidden','false');
+        document.documentElement.classList.add('no-scroll');
+        const firstLink = menu.querySelector('.mobile-menu__links a');
+        if(firstLink) firstLink.focus();
+      }
+      function closeMenu(){
+        burger.setAttribute('aria-expanded','false');
+        menu.classList.remove('open');
+        menu.setAttribute('aria-hidden','true');
+        document.documentElement.classList.remove('no-scroll');
+        setTimeout(()=>{ menu.hidden = true; }, 250);
+      }
+      burger.addEventListener('click', ()=> burger.getAttribute('aria-expanded')==='true' ? closeMenu() : openMenu());
+      backdrop.addEventListener('click', closeMenu);
+      closeBtn.addEventListener('click', closeMenu);
+      window.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeMenu(); });
+
+      /* ===== Timeline logic ===== */
+      const events = [
+        { title: 'My symptoms started to escalate.', detail: 'Each month my pain was worse than the last, my periods had always been heavy, but things were feeling out of control.' },
+        { title: 'Finally visited the GP', detail: 'My GP was kind; she reassured me things were ok and gave me advice on managing my pain.' },
+        { title: 'Things got worse', detail: 'It’s hard to imagine the pain could get worse, but it did. Each month I’d be incapacitated with pain, sickness and dizziness, it was all consuming.' },
+        { title: 'Back to the doc.', detail: 'I returned, explaining to my doctor how bad things had got, they suggested an ultrasound scan.' },
+        { title: 'Finally! An ultrasound scan.', detail: 'I had my scan, waited a few weeks to hear that the ultrasound scan was inconclusive.' },
+        { title: 'I ended up in A&E.', detail: 'My partner found me passed out and rushed me to A&E; I was sent home with painkillers, feeling sick and very low.' },
+        { title: 'Follow up with the doc.', detail: 'Back to my GP again and this time he requested a referral to gynaecology. Such relief that things would be investigated.' },
+        { title: 'A very long wait.', detail: 'The wait for a gynaecology appointment was ridiculous. I had a tough year, and my relationships were showing the strain.' },
+        { title: 'Gynae appointment.', detail: 'They suggested a hormonal coil; bleeding reduced, but pain didn’t.' },
+        { title: 'Surgery scheduled', detail: 'Another inconclusive ultrasound and an exploratory laparoscopy was scheduled.' },
+        { title: 'Surgery done. Diagnosis confirmed', detail: 'Finally, answers. Endometriosis was found and partly removed. Another surgery will be needed, but the validation was a relief.' }
+      ];
+
+      // Geometry
+      const VIEW_W = 1200, VIEW_H = 700;
+      const startDeg = 150, endDeg = 30;
+      const cx = 600, cy = 560, R = 520, LABEL_R = R + 28;
+
+      // Helpers
+      const toRad = d => (d * Math.PI) / 180;
+      const lerp  = (a,b,t)=>a+(b-a)*t;
+      function pointOnCircle(deg, radius){
+        const rad = toRad(deg);
+        return { x: cx + radius * Math.cos(rad), y: cy - radius * Math.sin(rad) };
+      }
+      function toCssPoint(x, y){
+        const el = document.getElementById('timeline');
+        const rect = el.getBoundingClientRect();
+        const sx = rect.width  / VIEW_W;
+        const sy = rect.height / VIEW_H;
+        return { left: x * sx, top: y * sy };
+      }
+      function arcPath(a1, a2){
+        const p1 = pointOnCircle(a1, R);
+        const p2 = pointOnCircle(a2, R);
+        const largeArc = (Math.abs(a2 - a1) % 360) > 180 ? 1 : 0;
+        const sweep = a2 < a1 ? 1 : 0;
+        return `M ${p1.x} ${p1.y} A ${R} ${R} 0 ${largeArc} ${sweep} ${p2.x} ${p2.y}`;
+      }
+
+      // Build timeline
+      function build(){
+        const arc   = document.getElementById('arc');
+        const dotsG = document.getElementById('dots');
+        const labels= document.getElementById('labels');
+
+        arc.setAttribute('d', arcPath(startDeg, endDeg));
+        arc.style.display = 'block';
+
+        const degs = Array.from({length:events.length}, (_,i)=> lerp(startDeg, endDeg, i/(events.length-1)) );
+        dotsG.innerHTML = '';
+        labels.innerHTML = '';
+
+        // labels
+        degs.forEach((deg, idx)=>{
+          const label = document.createElement('div');
+          label.className = 'label';
+          label.textContent = `Year ${idx+1}`;
+          label.dataset.index = String(idx);
+          labels.appendChild(label);
+        });
+
+        // dots
+        degs.forEach((deg, idx)=>{
+          const dp = pointOnCircle(deg, R);
+          const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+          c.setAttribute('class','dot');
+          c.setAttribute('r', '7.5');
+          c.setAttribute('cx', String(dp.x));
+          c.setAttribute('cy', String(dp.y));
+          c.dataset.index = String(idx);
+          dotsG.appendChild(c);
+        });
+
+        placeLabels(degs);
+      }
+
+      function placeLabels(degs){
+        const labels = document.querySelectorAll('.label');
+        labels.forEach((el,i)=>{
+          const lp = pointOnCircle(degs[i], LABEL_R);
+          const css = toCssPoint(lp.x, lp.y);
+          el.style.left = css.left + 'px';
+          el.style.top  = css.top  + 'px';
+        });
+      }
+
+      // Info card
+      const info      = document.getElementById('info');
+      const infoTitle = document.getElementById('infoTitle');
+      const infoText  = document.getElementById('infoText');
+      let currentIndex = -1;
+
+      function positionInfo(){
+        const r = R * 0.62; // center radius
+        const p = pointOnCircle(90, r);
+        const css = toCssPoint(p.x, p.y);
+        info.style.left = css.left + 'px';
+        info.style.top  = css.top  + 'px';
+        info.style.transform = 'translate(-50%, -50%)';
+        info.style.opacity = '1';
+      }
+      function fadeInfoTo(title, text){
+        const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (prefersReduced){
+          infoTitle.textContent = title;
+          infoText.textContent  = text;
+          info.style.opacity = '1';
+          info.style.transform = 'translate(-50%, -50%)';
+          return;
+        }
+        info.style.opacity = '0';
+        info.style.transform = 'translate(-50%, calc(-50% + 6px))';
+        setTimeout(()=>{
+          infoTitle.textContent = title;
+          infoText.textContent  = text;
+          requestAnimationFrame(()=>{
+            info.style.opacity = '1';
+            info.style.transform = 'translate(-50%, -50%)';
+          });
+        }, 80);
+      }
+          function setActive(i){
+      i = Math.max(0, Math.min(events.length-1, i));
+      const prev = Math.max(0, i-1);
+      const next = Math.min(events.length-1, i+1);
+
+      // Dots
+      document.querySelectorAll('.dot').forEach(el=>{
+        const idx = Number(el.dataset.index);
+        const active = idx === i;
+        const past   = idx <  i;
+        const near   = idx === prev || idx === next;
+
+        el.classList.toggle('active', active);
+        el.classList.toggle('past', past);
+        el.classList.toggle('near', near);     // keep your near effect if you like
+        el.setAttribute('r', active ? '10.5' : '7.5');
+      });
+
+      // Labels (optional dimming + active highlight)
+      document.querySelectorAll('.label').forEach(el=>{
+        const idx = Number(el.dataset.index);
+        const active = idx === i;
+        const past   = idx <  i;
+
+        el.classList.toggle('active', active);
+        el.classList.toggle('past', past);     // matches the CSS above
+        el.style.transform = active
+          ? 'translate(-50%, -50%) scale(1.05)'
+          : 'translate(-50%, -50%) scale(1)';
+      });
+
+      // Info card swap
+      if(i !== currentIndex){
+        const d = events[i];
+        fadeInfoTo(d.title, d.detail);
+        currentIndex = i;
+      }
+    }
+      function onScroll(){
+        const viewport = window.innerHeight;
+        const totalHeight = document.querySelector('.pin-wrap').offsetHeight;
+        const end   = totalHeight - viewport;
+        const scrollY = Math.min(Math.max(window.scrollY - document.getElementById('pin').offsetTop, 0), end);
+        const progress = end > 0 ? scrollY / end : 0;
+        const idx = Math.floor(progress * events.length);
+        setActive(idx);
+      }
+
+      // Init
+      build();
+      positionInfo();
+      setActive(0);
+
+      // Listeners
+      window.addEventListener('scroll', onScroll, {passive:true});
+      window.addEventListener('resize', ()=>{
+        const degs = Array.from({length:events.length}, (_,i)=> (150 + (30-150) * (i/(events.length-1))));
+        placeLabels(degs);
+        positionInfo();
+      });
+      window.addEventListener('orientationchange', positionInfo);
+
+      // Tap-to-jump on labels/dots
+      document.getElementById('labels').addEventListener('click', (e)=>{
+        const target = e.target.closest('.label'); if(!target) return;
+        setActive(Number(target.dataset.index));
+      });
+      document.getElementById('dots').addEventListener('click', (e)=>{
+        const c = e.target.closest('circle.dot'); if(!c) return;
+        setActive(Number(c.dataset.index));
+      });
+    });
+  </script>
+</body>
+</html>
+
+
+
+
+
